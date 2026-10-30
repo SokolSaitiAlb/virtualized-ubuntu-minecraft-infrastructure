@@ -10,14 +10,15 @@ This checklist distinguishes work already performed in the original personal lab
 - [x] Set up KVM/QEMU on CachyOS using the existing Arch-family installer.
 - [x] Create an Ubuntu Server VM.
 - [x] Configure VM resource allocation and the required passthrough for the original setup.
-- [ ] Add automatic host-distribution detection to the KVM installer.
-- [ ] Add safe handling for unsupported distributions; do not run pacman commands on non-Arch systems.
-- [ ] Test OS detection on CachyOS and representative non-Arch distributions.
-- [ ] Record exact CPU, memory, storage, and device passthrough settings.
+- [ ] Merge and verify automatic host-distribution detection in the KVM installer.
+- [ ] Test OS detection on the actual CachyOS host and representative non-Arch distributions.
+- [ ] Record exact CPU, memory, storage, and device passthrough settings from the actual host.
 - [ ] Add sanitized VM configuration evidence.
-- [ ] Document VM start/stop and recovery procedure.
+- [x] Document VM start/stop and recovery procedure in [the VM lifecycle runbook](docs/runbooks/vm-lifecycle.md).
 
-> **Current installer status:** The existing `install-kvm-cachyos.sh` uses `pacman` and targets CachyOS/Arch-based systems. It does not currently auto-detect the host distribution. The detection and multi-distro behavior above are planned script improvements, not implemented features.
+> **Installer status (2026-10-30):** Fail-closed OS detection is implemented on branch `feat/host-os-detection` in [PR #1](https://github.com/SokolSaitiAlb/install-kvm-cachyos.sh/pull/1). GitHub Actions Shell checks completed successfully for the PR commit. The PR has not yet been confirmed merged into `main`; therefore the default-branch installer and this checklist do not treat the feature as released. The script supports CachyOS/Arch-family only; it does not install through apt/dnf/zypper.
+
+> **Evidence status:** [Phase A host and VM evidence](docs/phase-a-host-vm-evidence.md) records the known project facts, collection commands, sanitization rules, and fields still awaiting output from the real host. Exact VM CPU/RAM/disk/PCI passthrough values are not present in the current source documentation and remain unverified.
 
 ### Ubuntu Server administration
 
@@ -67,7 +68,7 @@ This checklist distinguishes work already performed in the original personal lab
 - [ ] Capture repeatable resource observations under idle and player load.
 - [ ] Document common failure scenarios and troubleshooting.
 - [ ] Add sanitized architecture/network diagrams.
-- [ ] Add operational runbooks.
+- [x] Add VM start/stop/recovery runbook.
 - [ ] Review all documentation for secrets and unsupported claims.
 
 ## Secondary lab — Phase 6: Android Linux Administration & Portable Infrastructure Lab
