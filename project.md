@@ -17,21 +17,33 @@ A personal infrastructure project built to practice Linux administration, virtua
 ```text
 Physical workstation
 └── CachyOS
-    └── KVM / QEMU
+    └── KVM / QEMU + libvirt
         └── Ubuntu Server VM
             ├── PaperMC
             ├── Geyser-Spigot
-            └── Playit.gg tunnel
+            └── Playit.gg agent and tunnels
 ```
 
 This is the original and primary project architecture. It remains unchanged by the Android lab.
+
+### Host identification and KVM installer
+
+The host operating system should be identified before installing virtualization packages. The project guide uses `/etc/os-release`, architecture information, and CPU virtualization flags as preflight checks.
+
+The linked installer repository is:
+
+https://github.com/SokolSaitiAlb/install-kvm-cachyos.sh
+
+The inspected installer uses `pacman` to install QEMU/KVM, libvirt, Virt-Manager, and supporting packages. It enables `libvirtd` and adds the current user to the `libvirt` group.
+
+**Current limitation:** the script does not automatically detect the host distribution and is intended for CachyOS/Arch-based systems. It must not be run as a universal installer on Ubuntu, Debian, Fedora, or other non-Arch distributions. Automatic distribution detection and safe per-distribution handling are future improvements.
 
 ### Host and virtualization
 
 - CachyOS is the physical Linux host.
 - KVM/QEMU is used to run an Ubuntu Server virtual machine.
 - The VM was provisioned with CPU, storage, and device/network passthrough configuration for the original setup.
-- The host-side setup workflow is documented in the user's separate repository: https://github.com/SokolSaitiAlb/install-kvm-cachyos.sh
+- The repeatable procedure is documented in [roadmap.md](roadmap.md).
 
 Exact VM resource values and passthrough mappings should be recorded from the actual configuration rather than inferred.
 
@@ -48,16 +60,16 @@ Exact VM resource values and passthrough mappings should be recorded from the ac
 - The server was tested from a local Minecraft client using Prism Launcher.
 - The setup was also exercised by remote players.
 
-Do not add unverified version numbers, service unit names, benchmark results, or uptime claims.
+The step-by-step guide covers Ubuntu Server installation, Java runtime selection, PaperMC startup, EULA handling, and Geyser plugin installation. Do not add unverified version numbers, service unit names, benchmark results, or uptime claims.
 
 ### Networking
 
 - Playit.gg provided tunnel-based external connectivity.
 - The configured custom hostname was `albkestrel.minecraft.party`.
-- The Geyser/Bedrock endpoint used UDP port `19132`.
+- The Geyser/Bedrock endpoint used port `19132` in the original setup.
 - The setup was tested from local and external networks, including players in Prishtina and Shkup.
 
-The exact tunnel configuration may change over time. Do not commit private tunnel credentials or expose sensitive dashboard information.
+The exact tunnel configuration may change over time. Geyser transport settings and Playit protocol availability are version- and plan-dependent. Match the Playit tunnel protocol and local origin to the active Geyser configuration. Do not commit private tunnel credentials or expose sensitive dashboard information.
 
 ### Firewall and security state
 
@@ -119,7 +131,7 @@ This table describes the architectural distinction; actual Android app behavior 
 | Technology | Use |
 |---|---|
 | CachyOS | Physical Linux host |
-| KVM / QEMU | Primary lab virtualization |
+| KVM / QEMU + libvirt | Primary lab virtualization |
 | Ubuntu Server | Minecraft server guest |
 | Bash | Installation and administration automation |
 | OpenSSH | Remote administration |
@@ -148,6 +160,7 @@ Useful evidence includes sanitized terminal output, configuration excerpts, serv
 
 ## 5. Known gaps and next work
 
+- Implement and test host OS detection and safe unsupported-distribution handling in the separate KVM installer repository.
 - Apply and verify restrictive host and guest firewall rules.
 - Document exact VM CPU, memory, storage, and passthrough configuration.
 - Record application and runtime versions.
@@ -158,6 +171,12 @@ Useful evidence includes sanitized terminal output, configuration excerpts, serv
 ## 6. Related resources
 
 - Host KVM setup workflow: https://github.com/SokolSaitiAlb/install-kvm-cachyos.sh
+- Ubuntu Server downloads: https://ubuntu.com/download/server
+- PaperMC: https://papermc.io/software/paper/
+- Geyser-Spigot latest download: https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot
+- Geyser setup guide: https://geysermc.org/wiki/geyser/setup/
+- Playit.gg: https://playit.gg/
+- Playit Linux agent guide: https://playit.gg/support/run-on-linux/
 - Complete Linux Installer: https://f-droid.org/packages/com.devwithzachary.completelinuxinstaller
 - Complete Linux Installer source: https://github.com/devwithzachary/LinuxOnAndroid
 - Minecraft test video: https://youtu.be/TmqTv8vhd3o
