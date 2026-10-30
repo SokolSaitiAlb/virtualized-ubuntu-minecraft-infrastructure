@@ -437,3 +437,83 @@ PRoot provides a Linux userspace environment, not a separate Linux kernel or KVM
 3. Start Phase 6 as an isolated Android experiment.
 4. Record test evidence and limitations as each Android task is completed.
 5. Update `todo.md` only after a task has actually passed its acceptance test.
+
+
+## Phase A — Host/VM evidence and lifecycle operations
+
+The implementation record and exact-value inventory are in:
+- [Phase A host and VM evidence](docs/phase-a-host-vm-evidence.md)
+- [VM lifecycle runbook](docs/runbooks/vm-lifecycle.md)
+
+The documents include read-only collection commands, VM configuration and passthrough verification, sanitization rules, graceful start/stop, diagnostics, and emergency recovery. Exact live host/VM values remain pending command output from the actual CachyOS host and Ubuntu guest.
+
+## Phase B — Ubuntu Server administration
+
+Follow [the Ubuntu Server administration runbook](docs/runbooks/ubuntu-server-administration.md) to capture:
+- Ubuntu release, kernel, architecture, package inventory and update state.
+- Effective SSH configuration via `sshd -T`, authentication method, allowed users and safe validation sequence.
+- User/group/sudo membership, service identities, process ownership, file permissions and listening sockets for least-privilege review.
+
+This phase is not complete until actual guest output is recorded and any justified changes are applied and tested. The runbook does not assume SSH keys or password authentication are currently configured in a particular way.
+
+## Phase C — Minecraft operations and data protection
+
+Follow [the Minecraft operations runbook](docs/runbooks/minecraft-operations.md) to inventory exact Java, Minecraft, Paper, Geyser and plugin versions; document official plugin update/rollback; discover the real server process manager, service unit, working directory and logs.
+
+A fail-closed backup template is available at [scripts/backup-minecraft.sh](scripts/backup-minecraft.sh). It requires an explicitly configured systemd unit, server directory, and backup directory on a different filesystem. It stops the service gracefully, creates a full-directory archive and checksum, and attempts to restart the service. It is not a deployed schedule and has not been run against the live server. Full archives may contain secrets and must be access-restricted.
+
+Acceptance sequence:
+1. Confirm the real systemd unit and server directory.
+2. Prepare a separate mounted backup filesystem and verify capacity.
+3. Review the script and configure the exact environment variables.
+4. Run a backup during a maintenance window and confirm the server restarts.
+5. Verify SHA-256 and archive listing.
+6. Extract to an isolated test directory/environment, never over the live world.
+7. Verify world, plugin/config files and isolated startup before marking restore complete.
+
+## Phase D — Network security
+
+Follow [the network security runbook](docs/runbooks/network-security.md) before changing firewall rules. First map the host's firewall backend, libvirt bridge/NAT, guest interface, trusted SSH subnet, actual Paper listener, Geyser transport and Playit tunnel's public protocol/local origin.
+
+The historic Bedrock port `19132` is not sufficient evidence of the current Geyser transport. Inspect the installed Geyser config and startup logs, then match Playit to the configured RakNet/UDP or NetherNet/TCP+UDP requirements.
+
+Do not enable a generic default-deny policy on the host or guest until SSH recovery access and libvirt forwarding are understood. The host and guest firewalls were disabled during troubleshooting; this remains an explicit security risk. Mark this phase complete only after both firewall policies are active and the SSH, Java, Bedrock, and Playit connectivity matrix passes.
+
+
+## Phase E — Monitoring, troubleshooting and documentation
+
+Follow [the monitoring and troubleshooting runbook](docs/runbooks/monitoring-troubleshooting.md).
+
+### Measurement plan
+- Capture a host and guest idle baseline.
+- Capture representative normal-load and controlled-peak samples using comparable VM allocations, JVM settings, workload and duration.
+- Record CPU, memory, disk capacity/I/O, network counters, Java process RSS/CPU, player count and Paper tick performance where available.
+- Preserve raw output privately; publish sanitized summaries only.
+- Do not claim benchmarks or performance improvements without repeatable evidence.
+
+Read-only collection helper: `scripts/collect-host-evidence.sh <vm-name>`. It collects host and libvirt state; it does not enter the guest or change configuration.
+
+### Troubleshooting and documentation
+- Use the decision trees for VM startup, SSH, Paper startup, Geyser/Bedrock, Playit agent and disk-full incidents.
+- Record incident timestamps, symptoms, commands, root cause confidence, remediation, rollback and post-change connectivity tests.
+- Use [architecture diagram](docs/diagrams/architecture.md) and [network flow diagram](docs/diagrams/network-flow.md) as evidence templates. Fill actual IPs/ports/protocols only after inspection; redact private values before publishing.
+- Complete the security/secrets review before publishing changes. The helper `scripts/review-secrets.sh` is a limited filename-only pattern scan, not a full repository-history scan or substitute for Gitleaks.
+
+### Phase E acceptance
+Idle/load measurement, real incident exercise, complete secrets scan/history review, credential rotation where necessary, and sanitized diagrams remain unchecked until performed.
+
+## Phase F — Android PRoot Linux administration lab
+
+**Status: Planned; not installed or tested.**
+
+Follow [docs/phase-f-android-proot-lab.md](docs/phase-f-android-proot-lab.md).
+
+1. Verify Complete Linux Installer source/version and Android compatibility.
+2. Install Ubuntu or Debian userspace in PRoot; record OS, package manager, storage and Android host-kernel details.
+3. Run Bash, Python and Git exercises.
+4. Test whether sshd can run in PRoot and attempt SSH from CachyOS over trusted LAN; document Android background/network limitations.
+5. Run NGINX on loopback port 8080 only and verify with curl.
+6. Export/backup using the installer-supported method, verify integrity, and restore into a separate test environment.
+7. Compare PRoot with KVM/QEMU without claiming separate-kernel or VM-grade isolation.
+
+Phase F remains Planned until each test has real evidence. Do not expose SSH/NGINX publicly or grant Android root privileges for this lab.
