@@ -81,7 +81,7 @@ restart_server() {
 cleanup() {
   local status=$?
   trap - EXIT INT TERM
-  rm -f "$TMP_ARCHIVE"
+  rm -f "$TMP_ARCHIVE" || true
   if (( RESTART_REQUIRED )); then
     restart_server || status=1
   fi
