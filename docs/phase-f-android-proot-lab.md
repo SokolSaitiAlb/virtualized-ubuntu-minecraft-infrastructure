@@ -1,6 +1,6 @@
 # Phase F — Android PRoot Linux Administration Lab
 
-<badge>Planned — not yet executed</badge>
+**Status: Planned — not yet executed.**
 
 **Device recorded for this project:** Pixel 8a, Android 17.  
 **Intended installer:** Complete Linux Installer.  
