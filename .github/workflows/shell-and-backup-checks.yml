@@ -1,4 +1,4 @@
-name: Shell and backup-template checks
+name: Shell and operational-script checks
 
 on:
   push:
@@ -21,6 +21,11 @@ jobs:
       - name: Check shell syntax
         run: |
           bash -n scripts/backup-minecraft.sh
+          bash -n scripts/collect-host-evidence.sh
+          bash -n scripts/review-secrets.sh
           bash -n tests/test-backup-template.sh
-      - name: Run static backup-template checks
-        run: bash tests/test-backup-template.sh
+          bash -n tests/test-phase-e-scripts.sh
+      - name: Run static safety checks
+        run: |
+          bash tests/test-backup-template.sh
+          bash tests/test-phase-e-scripts.sh

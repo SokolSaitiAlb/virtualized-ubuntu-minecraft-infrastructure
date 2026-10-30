@@ -189,3 +189,29 @@ Useful evidence includes sanitized terminal output, configuration excerpts, serv
 - **Needs verification:** described in project history but lacking sufficient repeatable evidence.
 
 The Android lab must remain **Planned** until the corresponding tests are completed.
+
+
+## 8. Phase E — Monitoring and operational documentation
+
+The repository now includes [monitoring and troubleshooting runbook](docs/runbooks/monitoring-troubleshooting.md), [architecture diagram](docs/diagrams/architecture.md), and [network flow diagram](docs/diagrams/network-flow.md).
+
+The monitoring method distinguishes host and guest measurements and defines idle, normal-load and controlled-peak windows. Actual numeric measurements have not yet been supplied; no benchmark result or performance improvement is claimed. The diagrams are templates and must be populated with verified, sanitized values.
+
+The read-only helper `scripts/collect-host-evidence.sh <vm-name>` collects host and libvirt data. It does not collect guest metrics or change host/VM configuration.
+
+The `scripts/review-secrets.sh` helper checks a limited set of tracked working-tree patterns and prints filenames only. It is not a comprehensive secret scanner and does not inspect full repository history, ignored/untracked files, or every credential format. A dedicated history-aware scan and credential rotation are still required before declaring the repository security-reviewed.
+
+## 9. Phase F — Android PRoot lab status
+
+**Status: Planned; not executed.**
+
+The detailed plan is in [docs/phase-f-android-proot-lab.md](docs/phase-f-android-proot-lab.md). It covers Complete Linux Installer, Ubuntu/Debian, Bash, Python, Git, SSH from CachyOS, loopback-only NGINX, backup/restore and PRoot-versus-KVM comparison.
+
+The plan intentionally does not assume:
+- that the installer is currently maintained or compatible with this Android build;
+- that systemd works inside the PRoot environment;
+- that sshd can bind a reachable LAN interface;
+- that Android permits persistent background services;
+- that app backup/export captures every file or restores cleanly.
+
+These points require tests on the actual Pixel device. PRoot uses the Android host kernel and does not provide a separate guest kernel or KVM-equivalent hardware virtualization.

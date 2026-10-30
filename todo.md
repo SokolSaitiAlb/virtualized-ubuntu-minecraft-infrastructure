@@ -145,3 +145,53 @@ Target distribution: Ubuntu or Debian
 - [ ] Remove secrets, private keys, passwords, and sensitive tunnel details.
 - [ ] Verify repository links and scripts.
 - [ ] Distinguish personal project work from professional employment experience.
+
+
+## Phase E — Monitoring and documentation
+
+- [x] Add repeatable host/guest idle, normal-load and controlled-peak measurement procedure.
+- [x] Add VM/SSH/Paper/Geyser/Playit/disk troubleshooting decision guide.
+- [x] Add architecture and network-flow Mermaid diagrams as evidence templates.
+- [x] Add read-only host/libvirt evidence collection helper.
+- [x] Add limited filename-only secret-pattern review helper.
+- [x] Add operational incident record and cross-reference earlier runbooks.
+- [ ] Capture actual host and guest idle measurements.
+- [ ] Capture representative normal-load and controlled-peak measurements.
+- [ ] Record CPU, RAM, disk, network, Java process and Paper tick metrics.
+- [ ] Exercise at least one troubleshooting procedure and document outcome.
+- [ ] Populate diagrams with verified topology and sanitized values.
+- [ ] Run a dedicated secret scanner (e.g. Gitleaks) against working tree and full repository history.
+- [ ] Triage findings and rotate/revoke any exposed credentials.
+- [ ] Confirm no private keys, tokens, passwords, raw backups, or unredacted VM XML are committed.
+
+References:
+- [Monitoring/troubleshooting runbook](docs/runbooks/monitoring-troubleshooting.md)
+- [Architecture diagram](docs/diagrams/architecture.md)
+- [Network flow diagram](docs/diagrams/network-flow.md)
+- `scripts/collect-host-evidence.sh`
+- `scripts/review-secrets.sh`
+
+> The helper secret scan is deliberately limited and prints filenames only. It does not inspect ignored/untracked files, every token format, or full Git history. A clean helper result is not a security certification.
+
+## Phase F — Android PRoot Linux Administration Lab
+
+**Status: Planned — no installation or test has been performed.**
+
+- [x] Document Complete Linux Installer + Ubuntu/Debian PRoot plan.
+- [x] Document Bash, Python and Git exercises.
+- [x] Document SSH feasibility and CachyOS-to-Pixel LAN test.
+- [x] Document loopback-only NGINX test.
+- [x] Document app-supported backup/export, integrity verification and isolated restore.
+- [x] Document PRoot versus KVM/QEMU architectural comparison.
+- [ ] Verify installer source, maintenance status, version and Android compatibility.
+- [ ] Install Ubuntu or Debian userspace and capture inventory.
+- [ ] Run Bash script and Python script.
+- [ ] Complete Git init/add/commit/status exercise.
+- [ ] Determine sshd feasibility and test SSH from CachyOS.
+- [ ] Start NGINX on 127.0.0.1:8080 and verify with curl; stop and confirm listener closed.
+- [ ] Complete supported backup/export and checksum validation.
+- [ ] Restore into a separate fresh environment and verify tools/files.
+- [ ] Record Android background execution/network constraints.
+- [ ] Update PRoot versus KVM comparison with observed device results.
+
+> Keep Phase F independent from the Minecraft VM. PRoot uses the Android host kernel and is not a full-system VM. Do not expose SSH/NGINX publicly or commit environment backups.

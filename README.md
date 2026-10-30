@@ -82,3 +82,20 @@ The default branch of the KVM installer must be checked before use. The installe
 - **Android Linux lab / Phase 6:** planned; installation and tests on Pixel 8a have not been recorded as complete.
 
 See [todo.md](todo.md) for current acceptance criteria.
+
+
+## Phase E — Monitoring and operational documentation
+
+- [Monitoring and troubleshooting runbook](docs/runbooks/monitoring-troubleshooting.md) — repeatable idle/normal/peak sampling method, host/guest metrics, troubleshooting decision trees, incident records, and secrets-review procedure.
+- [Architecture diagram](docs/diagrams/architecture.md) — primary KVM Minecraft lab and separate Android PRoot lab.
+- [Network flow diagram](docs/diagrams/network-flow.md) — intended SSH, Java, Bedrock and Playit flows; protocol/ports remain evidence fields until confirmed.
+- `scripts/collect-host-evidence.sh` — read-only host/libvirt evidence collector.
+- `scripts/review-secrets.sh` — limited filename-only secret-pattern scan; not a full history scanner or Gitleaks replacement.
+
+No idle/load values have been invented. No secret scan, performance benchmark, or troubleshooting exercise is claimed complete until run and recorded.
+
+## Phase F — Android PRoot lab
+
+[Phase F Android PRoot Lab](docs/phase-f-android-proot-lab.md) defines the planned Complete Linux Installer + Ubuntu/Debian exercises: Bash, Python, Git, SSH from CachyOS, loopback-only NGINX, backup/restore and PRoot-versus-KVM comparison.
+
+**Phase F remains Planned.** No installation or device tests are marked complete.
