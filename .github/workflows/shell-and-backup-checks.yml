@@ -1,0 +1,31 @@
+name: Shell and operational-script checks
+
+on:
+  push:
+    branches:
+      - main
+      - docs/phase-**
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  shell-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Check shell syntax
+        run: |
+          bash -n scripts/backup-minecraft.sh
+          bash -n scripts/collect-host-evidence.sh
+          bash -n scripts/review-secrets.sh
+          bash -n tests/test-backup-template.sh
+          bash -n tests/test-phase-e-scripts.sh
+      - name: Run static safety checks
+        run: |
+          bash tests/test-backup-template.sh
+          bash tests/test-phase-e-scripts.sh
