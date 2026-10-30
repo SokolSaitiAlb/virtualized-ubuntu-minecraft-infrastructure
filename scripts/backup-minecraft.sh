@@ -13,7 +13,8 @@ Usage:
 Requirements:
   - The Paper server is managed by a confirmed systemd unit.
   - The unit is active before backup.
-  - Backup destination is outside MC_SERVER_DIR and has sufficient free space.
+  - Backup destination is outside MC_SERVER_DIR and on a different filesystem.
+  - Backup destination already exists and has sufficient free space.
   - This script is run by an account allowed to stop/start the unit and read server files.
 
 The script gracefully stops the unit, archives the full server directory, writes a SHA-256
@@ -40,14 +41,21 @@ case "$DEST_REAL/" in
   "$SOURCE_REAL/"*) fail "Backup destination is inside the live server directory." ;;
 esac
 
+SOURCE_DEVICE="$(stat -c '%d' "$SOURCE_REAL")"
+DEST_DEVICE="$(stat -c '%d' "$DEST_REAL")"
+[[ "$SOURCE_DEVICE" != "$DEST_DEVICE" ]] || fail "Backup destination must be on a different filesystem."
+
 command -v systemctl >/dev/null || fail "systemctl is required."
 command -v tar >/dev/null || fail "tar is required."
 command -v sha256sum >/dev/null || fail "sha256sum is required."
 command -v flock >/dev/null || fail "flock is required."
+command -v realpath >/dev/null || fail "realpath is required."
+command -v stat >/dev/null || fail "stat is required."
 
 systemctl cat "$MC_SYSTEMD_UNIT" >/dev/null 2>&1 || fail "Unknown systemd unit: $MC_SYSTEMD_UNIT"
 systemctl is-active --quiet "$MC_SYSTEMD_UNIT" || fail "Server unit must be active before backup."
 [[ -r "$SOURCE_REAL/server.properties" ]] || fail "Server files are not readable."
+[[ -w "$DEST_REAL" ]] || fail "Backup destination is not writable."
 
 LOCK_FILE="$DEST_REAL/.minecraft-backup.lock"
 exec 9>"$LOCK_FILE"
@@ -58,7 +66,6 @@ BASE="minecraft-server-$STAMP.tar.gz"
 ARCHIVE="$DEST_REAL/$BASE"
 TMP_ARCHIVE="$ARCHIVE.partial"
 RESTART_REQUIRED=0
-BACKUP_OK=0
 
 restart_server() {
   if (( RESTART_REQUIRED )); then
@@ -73,6 +80,7 @@ restart_server() {
 
 cleanup() {
   local status=$?
+  trap - EXIT INT TERM
   rm -f "$TMP_ARCHIVE"
   if (( RESTART_REQUIRED )); then
     restart_server || status=1
@@ -95,7 +103,6 @@ chmod 600 "$ARCHIVE"
 sha256sum "$ARCHIVE" > "$ARCHIVE.sha256"
 chmod 600 "$ARCHIVE.sha256"
 sha256sum -c "$ARCHIVE.sha256"
-BACKUP_OK=1
 
 printf 'Backup verified: %s\n' "$ARCHIVE"
 printf 'SHA256: '
