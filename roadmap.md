@@ -437,3 +437,44 @@ PRoot provides a Linux userspace environment, not a separate Linux kernel or KVM
 3. Start Phase 6 as an isolated Android experiment.
 4. Record test evidence and limitations as each Android task is completed.
 5. Update `todo.md` only after a task has actually passed its acceptance test.
+
+
+## Phase A — Host/VM evidence and lifecycle operations
+
+The implementation record and exact-value inventory are in:
+- [Phase A host and VM evidence](docs/phase-a-host-vm-evidence.md)
+- [VM lifecycle runbook](docs/runbooks/vm-lifecycle.md)
+
+The documents include read-only collection commands, VM configuration and passthrough verification, sanitization rules, graceful start/stop, diagnostics, and emergency recovery. Exact live host/VM values remain pending command output from the actual CachyOS host and Ubuntu guest.
+
+## Phase B — Ubuntu Server administration
+
+Follow [the Ubuntu Server administration runbook](docs/runbooks/ubuntu-server-administration.md) to capture:
+- Ubuntu release, kernel, architecture, package inventory and update state.
+- Effective SSH configuration via `sshd -T`, authentication method, allowed users and safe validation sequence.
+- User/group/sudo membership, service identities, process ownership, file permissions and listening sockets for least-privilege review.
+
+This phase is not complete until actual guest output is recorded and any justified changes are applied and tested. The runbook does not assume SSH keys or password authentication are currently configured in a particular way.
+
+## Phase C — Minecraft operations and data protection
+
+Follow [the Minecraft operations runbook](docs/runbooks/minecraft-operations.md) to inventory exact Java, Minecraft, Paper, Geyser and plugin versions; document official plugin update/rollback; discover the real server process manager, service unit, working directory and logs.
+
+A fail-closed backup template is available at [scripts/backup-minecraft.sh](scripts/backup-minecraft.sh). It requires an explicitly configured systemd unit, server directory, and backup directory on a different filesystem. It stops the service gracefully, creates a full-directory archive and checksum, and attempts to restart the service. It is not a deployed schedule and has not been run against the live server. Full archives may contain secrets and must be access-restricted.
+
+Acceptance sequence:
+1. Confirm the real systemd unit and server directory.
+2. Prepare a separate mounted backup filesystem and verify capacity.
+3. Review the script and configure the exact environment variables.
+4. Run a backup during a maintenance window and confirm the server restarts.
+5. Verify SHA-256 and archive listing.
+6. Extract to an isolated test directory/environment, never over the live world.
+7. Verify world, plugin/config files and isolated startup before marking restore complete.
+
+## Phase D — Network security
+
+Follow [the network security runbook](docs/runbooks/network-security.md) before changing firewall rules. First map the host's firewall backend, libvirt bridge/NAT, guest interface, trusted SSH subnet, actual Paper listener, Geyser transport and Playit tunnel's public protocol/local origin.
+
+The historic Bedrock port `19132` is not sufficient evidence of the current Geyser transport. Inspect the installed Geyser config and startup logs, then match Playit to the configured RakNet/UDP or NetherNet/TCP+UDP requirements.
+
+Do not enable a generic default-deny policy on the host or guest until SSH recovery access and libvirt forwarding are understood. The host and guest firewalls were disabled during troubleshooting; this remains an explicit security risk. Mark this phase complete only after both firewall policies are active and the SSH, Java, Bedrock, and Playit connectivity matrix passes.
