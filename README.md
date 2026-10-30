@@ -2,7 +2,7 @@
 
 A personal Linux infrastructure project documenting how to build and operate a Minecraft server on an Ubuntu Server virtual machine hosted by a CachyOS workstation. The repository also tracks a completely separate Android Linux lab.
 
-> **Project scope:** This is a personal learning and portfolio project. The documented setup is not represented as a professional production environment. Follow the security notes and verify each step on your own hardware.
+> **Project scope:** This is a personal learning and portfolio project, not a claim of professional production infrastructure experience. Tasks are marked complete only when supported by actual execution or test evidence.
 
 ## Architecture
 
@@ -29,78 +29,56 @@ Pixel 8a · Android 17
             └── NGINX local test
 ```
 
-The Android PRoot environment is a separate laboratory. It is **not** KVM/QEMU, does not boot a separate Linux kernel, and is not part of the Minecraft server architecture.
+The Android PRoot environment is a separate laboratory. It is not KVM/QEMU, does not boot a separate Linux kernel, and is not part of the Minecraft server architecture.
 
-## Quick navigation
+## Documentation and runbooks
 
 | Document | Purpose |
 |---|---|
 | [masterplan.md](masterplan.md) | Scope, architecture, security principles, and lab separation |
-| [roadmap.md](roadmap.md) | Phased plan and step-by-step deployment guide |
+| [roadmap.md](roadmap.md) | Phased plan and deployment guide |
 | [project.md](project.md) | Technical project record, known state, and limitations |
-| [todo.md](todo.md) | Implementation checklist and remaining work |
+| [todo.md](todo.md) | Evidence-based implementation checklist |
+| [Phase A host/VM evidence](docs/phase-a-host-vm-evidence.md) | Host/guest inventory, VM resource/passthrough evidence, XML sanitization |
+| [VM lifecycle runbook](docs/runbooks/vm-lifecycle.md) | Start, graceful stop, diagnostics, and recovery |
+| [Ubuntu administration runbook](docs/runbooks/ubuntu-server-administration.md) | OS/package inventory, SSH, authentication, least privilege |
+| [Minecraft operations runbook](docs/runbooks/minecraft-operations.md) | Versions, plugins, lifecycle, logs, backup/restore |
+| [Network security runbook](docs/runbooks/network-security.md) | Host/guest firewall, SSH restrictions, Playit and connectivity tests |
 
-## Primary lab: end-to-end deployment guide
+## Backup automation template
 
-The full procedure is documented in [roadmap.md](roadmap.md), under **Phase 1–4: Step-by-step deployment guide**. The high-level sequence is:
+`scripts/backup-minecraft.sh` is a fail-closed template for a PaperMC directory managed by a confirmed systemd unit. It requires explicit absolute source/destination paths and unit name, stops the active unit gracefully, creates a full-directory archive and SHA-256 checksum, and attempts to restart the service.
 
-1. Identify the host Linux distribution and verify hardware virtualization support.
-2. On CachyOS/Arch-based hosts, review and run the [KVM installer script](https://github.com/SokolSaitiAlb/install-kvm-cachyos.sh).
-3. Download an Ubuntu Server ISO from the [official Ubuntu download page](https://ubuntu.com/download/server).
-4. Create and install an Ubuntu Server VM with KVM/QEMU using Virtual Machine Manager.
-5. Update Ubuntu Server and configure OpenSSH.
-6. Install the Java runtime required by the selected PaperMC release.
-7. Download and start [PaperMC](https://papermc.io/software/paper/).
-8. Install [Geyser-Spigot](https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot) in the Paper `plugins` directory.
-9. Create a [Playit.gg](https://playit.gg/) account, claim the Linux agent, create the required tunnels, and test external connectivity.
-10. Apply firewall rules deliberately, verify the server, and document backup and recovery procedures.
+It does **not** create a service unit, discover the live server path, configure a schedule, or claim that a backup/restore has been tested. Full backups may contain private configuration and credentials; protect them and do not commit archives. A restore test must extract into an isolated test directory/environment, never over the live world.
 
-## Host OS detection: important limitation
-
-The current `install-kvm-cachyos.sh` script uses `pacman` and installs Arch-family packages. It is intended for CachyOS/Arch-based systems. **The current script does not automatically detect the host distribution or install the correct virtualization stack on arbitrary Linux distributions.**
-
-Start by identifying the host:
+Static checks:
 
 ```bash
-cat /etc/os-release
-uname -m
+bash -n scripts/backup-minecraft.sh
+bash tests/test-backup-template.sh
 ```
 
-Check that CPU virtualization is available:
+## Deployment overview
 
-```bash
-lscpu | grep -E 'Virtualization|Architecture'
-grep -E -c '(vmx|svm)' /proc/cpuinfo
-```
+The existing deployment guide remains in [roadmap.md](roadmap.md). It covers CachyOS/KVM, Ubuntu Server, PaperMC, Geyser-Spigot, and Playit.gg. Always verify exact Java/Paper compatibility and Geyser transport requirements against official documentation for the versions actually installed.
 
-If the host is CachyOS or a compatible Arch-based distribution, review the installer source before running it. Do not run this pacman-based script on Ubuntu, Debian, Fedora, or another non-Arch distribution. Support for automatic distribution detection and distribution-specific installation paths is a future enhancement, not an existing feature.
+## Host OS detection limitation
 
-## Official downloads and references
-
-- [KVM installer repository](https://github.com/SokolSaitiAlb/install-kvm-cachyos.sh)
-- [Ubuntu Server downloads](https://ubuntu.com/download/server)
-- [PaperMC downloads](https://papermc.io/software/paper/)
-- [Geyser-Spigot latest download](https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot)
-- [Geyser setup documentation](https://geysermc.org/wiki/geyser/setup/)
-- [Playit.gg](https://playit.gg/)
-- [Playit Linux agent guide](https://playit.gg/support/run-on-linux/)
-- [Playit Linux 24/7 guide](https://playit.gg/support/host-247-with-playit/)
-
-Always check the official documentation for version-specific Java requirements, Minecraft compatibility, Geyser transport settings, and Playit tunnel availability before deployment.
+The default branch of the KVM installer must be checked before use. The installer repository's separate [host OS detection PR](https://github.com/SokolSaitiAlb/install-kvm-cachyos.sh/pull/1) is not considered released until merged and tested on the real CachyOS host. The script is not a universal multi-distro installer; it targets CachyOS/Arch-family systems and must not run pacman commands on non-Arch systems.
 
 ## Security and accuracy notes
 
 - Never commit passwords, SSH private keys, Playit claim tokens, agent secrets, or unredacted configuration files.
 - Do not expose SSH or RCON to the public internet.
-- Playit tunnels are configured in the Playit account and point to local service ports; do not publish agent credentials.
-- Do not assume that a successful tunnel test means the host and guest are fully hardened.
-- UFW was used during experimentation, but host and guest firewalls were disabled during troubleshooting. Firewall hardening remains an open task.
-- Backups are not considered verified until a restore test succeeds.
-- Mark tasks as completed only after they have been performed and tested.
+- Playit tunnels use an outbound agent connection; do not automatically expose Minecraft/SSH ports on the router.
+- Host and guest firewalls were disabled during troubleshooting. Firewall hardening remains unverified.
+- Do not apply firewall policy until libvirt forwarding, trusted SSH sources, Paper/Geyser listeners, and Playit tunnel protocol/origin have been mapped.
+- Backups are not considered verified until checksum validation and an isolated restore test succeed.
+- Do not claim a systemd service, server path, Java/Paper/Geyser version, or firewall rule unless observed on the actual VM.
 
 ## Project status
 
-- **Primary Minecraft lab:** built and exercised as a personal project; additional documentation, firewall hardening, and repeatable backup/restore evidence remain open.
-- **Android Linux lab / Phase 6:** planned; installation and tests on the Pixel 8a have not yet been recorded as completed.
+- **Primary Minecraft lab:** deployed and exercised as a personal project; Phase B-D evidence capture, operational automation, firewall hardening, and restore testing remain in progress.
+- **Android Linux lab / Phase 6:** planned; installation and tests on Pixel 8a have not been recorded as complete.
 
-See [roadmap.md](roadmap.md) for the full procedure and [todo.md](todo.md) for current work items.
+See [todo.md](todo.md) for current acceptance criteria.
