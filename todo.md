@@ -4,15 +4,20 @@ This checklist distinguishes work already performed in the original personal lab
 
 ## Primary lab — CachyOS / KVM / Ubuntu Server / Minecraft
 
-### Host and virtualization
+### Host identification and virtualization
 
 - [x] Use CachyOS as the physical Linux host.
-- [x] Set up KVM/QEMU on CachyOS.
+- [x] Set up KVM/QEMU on CachyOS using the existing Arch-family installer.
 - [x] Create an Ubuntu Server VM.
 - [x] Configure VM resource allocation and the required passthrough for the original setup.
+- [ ] Add automatic host-distribution detection to the KVM installer.
+- [ ] Add safe handling for unsupported distributions; do not run pacman commands on non-Arch systems.
+- [ ] Test OS detection on CachyOS and representative non-Arch distributions.
 - [ ] Record exact CPU, memory, storage, and device passthrough settings.
 - [ ] Add sanitized VM configuration evidence.
 - [ ] Document VM start/stop and recovery procedure.
+
+> **Current installer status:** The existing `install-kvm-cachyos.sh` uses `pacman` and targets CachyOS/Arch-based systems. It does not currently auto-detect the host distribution. The detection and multi-distro behavior above are planned script improvements, not implemented features.
 
 ### Ubuntu Server administration
 
@@ -37,16 +42,17 @@ This checklist distinguishes work already performed in the original personal lab
 - [ ] Implement repeatable Minecraft world backups.
 - [ ] Perform and document a successful restore test.
 
-### Network and security
+### Playit.gg, network and security
 
 - [x] Configure Playit.gg tunnel connectivity.
 - [x] Configure/use custom hostname `albkestrel.minecraft.party`.
-- [x] Test the Geyser/Bedrock UDP endpoint on port `19132`.
+- [x] Test the Geyser/Bedrock endpoint on port `19132`.
 - [x] Configure UFW during initial experimentation.
 - [ ] Re-enable and configure UFW on CachyOS with explicit required rules.
 - [ ] Re-enable and configure UFW in Ubuntu Server with explicit required rules.
 - [ ] Verify SSH access remains limited to intended trusted sources.
-- [ ] Verify Minecraft connectivity after firewall rules are applied.
+- [ ] Verify Minecraft Java and Geyser connectivity after firewall rules are applied.
+- [ ] Document current Geyser transport requirements and matching Playit tunnel protocol.
 - [ ] Document exposed ports and network paths.
 - [ ] Review tunnel configuration and remove obsolete credentials.
 
@@ -56,6 +62,8 @@ This checklist distinguishes work already performed in the original personal lab
 
 - [x] Use htop/btop for interactive monitoring.
 - [x] Test the server with local and remote players.
+- [x] Add a repository README with architecture, links, scope, and security notes.
+- [x] Add a step-by-step host, VM, PaperMC, Geyser, and Playit deployment guide to `roadmap.md`.
 - [ ] Capture repeatable resource observations under idle and player load.
 - [ ] Document common failure scenarios and troubleshooting.
 - [ ] Add sanitized architecture/network diagrams.
