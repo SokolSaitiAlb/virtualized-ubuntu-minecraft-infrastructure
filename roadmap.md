@@ -478,3 +478,42 @@ Follow [the network security runbook](docs/runbooks/network-security.md) before 
 The historic Bedrock port `19132` is not sufficient evidence of the current Geyser transport. Inspect the installed Geyser config and startup logs, then match Playit to the configured RakNet/UDP or NetherNet/TCP+UDP requirements.
 
 Do not enable a generic default-deny policy on the host or guest until SSH recovery access and libvirt forwarding are understood. The host and guest firewalls were disabled during troubleshooting; this remains an explicit security risk. Mark this phase complete only after both firewall policies are active and the SSH, Java, Bedrock, and Playit connectivity matrix passes.
+
+
+## Phase E — Monitoring, troubleshooting and documentation
+
+Follow [the monitoring and troubleshooting runbook](docs/runbooks/monitoring-troubleshooting.md).
+
+### Measurement plan
+- Capture a host and guest idle baseline.
+- Capture representative normal-load and controlled-peak samples using comparable VM allocations, JVM settings, workload and duration.
+- Record CPU, memory, disk capacity/I/O, network counters, Java process RSS/CPU, player count and Paper tick performance where available.
+- Preserve raw output privately; publish sanitized summaries only.
+- Do not claim benchmarks or performance improvements without repeatable evidence.
+
+Read-only collection helper: `scripts/collect-host-evidence.sh <vm-name>`. It collects host and libvirt state; it does not enter the guest or change configuration.
+
+### Troubleshooting and documentation
+- Use the decision trees for VM startup, SSH, Paper startup, Geyser/Bedrock, Playit agent and disk-full incidents.
+- Record incident timestamps, symptoms, commands, root cause confidence, remediation, rollback and post-change connectivity tests.
+- Use [architecture diagram](docs/diagrams/architecture.md) and [network flow diagram](docs/diagrams/network-flow.md) as evidence templates. Fill actual IPs/ports/protocols only after inspection; redact private values before publishing.
+- Complete the security/secrets review before publishing changes. The helper `scripts/review-secrets.sh` is a limited filename-only pattern scan, not a full repository-history scan or substitute for Gitleaks.
+
+### Phase E acceptance
+Idle/load measurement, real incident exercise, complete secrets scan/history review, credential rotation where necessary, and sanitized diagrams remain unchecked until performed.
+
+## Phase F — Android PRoot Linux administration lab
+
+**Status: Planned; not installed or tested.**
+
+Follow [docs/phase-f-android-proot-lab.md](docs/phase-f-android-proot-lab.md).
+
+1. Verify Complete Linux Installer source/version and Android compatibility.
+2. Install Ubuntu or Debian userspace in PRoot; record OS, package manager, storage and Android host-kernel details.
+3. Run Bash, Python and Git exercises.
+4. Test whether sshd can run in PRoot and attempt SSH from CachyOS over trusted LAN; document Android background/network limitations.
+5. Run NGINX on loopback port 8080 only and verify with curl.
+6. Export/backup using the installer-supported method, verify integrity, and restore into a separate test environment.
+7. Compare PRoot with KVM/QEMU without claiming separate-kernel or VM-grade isolation.
+
+Phase F remains Planned until each test has real evidence. Do not expose SSH/NGINX publicly or grant Android root privileges for this lab.
