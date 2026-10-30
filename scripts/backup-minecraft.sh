@@ -35,6 +35,13 @@ fail() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 [[ -f "$MC_SERVER_DIR/server.properties" ]] || fail "server.properties not found; check MC_SERVER_DIR."
 [[ "$MC_SERVER_DIR" != "/" && "$MC_BACKUP_DIR" != "$MC_SERVER_DIR" ]] || fail "Unsafe source/destination path."
 
+command -v systemctl >/dev/null || fail "systemctl is required."
+command -v tar >/dev/null || fail "tar is required."
+command -v sha256sum >/dev/null || fail "sha256sum is required."
+command -v flock >/dev/null || fail "flock is required."
+command -v realpath >/dev/null || fail "realpath is required."
+command -v stat >/dev/null || fail "stat is required."
+
 SOURCE_REAL="$(realpath "$MC_SERVER_DIR")"
 DEST_REAL="$(realpath "$MC_BACKUP_DIR")"
 case "$DEST_REAL/" in
@@ -44,13 +51,6 @@ esac
 SOURCE_DEVICE="$(stat -c '%d' "$SOURCE_REAL")"
 DEST_DEVICE="$(stat -c '%d' "$DEST_REAL")"
 [[ "$SOURCE_DEVICE" != "$DEST_DEVICE" ]] || fail "Backup destination must be on a different filesystem."
-
-command -v systemctl >/dev/null || fail "systemctl is required."
-command -v tar >/dev/null || fail "tar is required."
-command -v sha256sum >/dev/null || fail "sha256sum is required."
-command -v flock >/dev/null || fail "flock is required."
-command -v realpath >/dev/null || fail "realpath is required."
-command -v stat >/dev/null || fail "stat is required."
 
 systemctl cat "$MC_SYSTEMD_UNIT" >/dev/null 2>&1 || fail "Unknown systemd unit: $MC_SYSTEMD_UNIT"
 systemctl is-active --quiet "$MC_SYSTEMD_UNIT" || fail "Server unit must be active before backup."
